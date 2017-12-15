@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="cbbke.cs" />
     <Compile Include="Customers.cs">
       <DependentUpon>NorthWindModel.tt</DependentUpon>
     </Compile>

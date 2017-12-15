@@ -61,30 +61,38 @@ namespace 常用LINQ查詢
         /// dc.Order_Details.ToArray() 條件後先將欲查詢目標資料表ToArray() 轉成集合
         /// int.Parse( cbOrders.Text)因型態不同，使用parse
         /// od.UnitPrice * od.Quantity*(1 -(decimal)od.Discount) 型態不同所以轉型(decimal)
+        /// dataGridView1.Columns["商品小計"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+        /// Columns商品小計 靠右
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void cbOrders_SelectedIndexChanged(object sender, EventArgs e)
         {
-            NorthwindEntities dc = new NorthwindEntities();
-            var query = dc.Order_Details.ToArray().Where
-                            (od => od.OrderID == int.Parse( cbOrders.Text));
             
-            dataGridView1.DataSource = query.Select(od => new
-            {
+            NorthwindEntities dc = new NorthwindEntities();        
 
+            var query = (from od in dc.Order_Details select od).ToList()
+                        .Where(od => od.OrderID == int.Parse(cbOrders.Text));
+
+            var query2 = query.Select(od => new cbbke
+            {
                 訂單編號 = od.OrderID,
                 商品編號 = od.ProductID,
                 商品單價 = od.UnitPrice,
                 購買數量 = od.Quantity,
                 優惠折扣 = od.Discount,
-                商品小計 = (od.UnitPrice * od.Quantity * (1 - (decimal)od.Discount)).ToString("c")
-            }).ToArray();
+                商品小計 = (od.UnitPrice * od.Quantity * (decimal)(1 - od.Discount)).ToString()
+            }).ToList();
+            //dataGridView1.Columns["商品小計"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            cbbke cb = new cbbke();
+            cb.商品小計 = query.Sum(od=> od.UnitPrice * od.Quantity * (decimal)(1 - od.Discount)).ToString();
+            query2.Add(cb);
+            dataGridView1.DataSource = query2.ToArray();
 
-            decimal subtotal = query.Sum(od =>
-                                    od.UnitPrice * od.Quantity*(1 -(decimal)od.Discount));
-            labtotal.Text = string.Format($"小計：{subtotal.ToString("C")}");
+            //decimal subtotal = query.Sum(od => od.UnitPrice * od.Quantity * (1 - (decimal)od.Discount));
+            //labtotal.Text = string.Format($"小計：{subtotal.ToString("C")}");
 
         }
+
     }
 }
